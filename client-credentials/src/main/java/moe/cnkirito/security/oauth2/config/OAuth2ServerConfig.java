@@ -1,6 +1,8 @@
 package moe.cnkirito.security.oauth2.config;
 
 
+import moe.cnkirito.security.oauth2.service.CustomUserDetailsService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -31,6 +33,9 @@ public class OAuth2ServerConfig {
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
+    	@Autowired
+    	private CustomAuthenticationEntryPoint customAuthenticationEntryPoint ;
+    	
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) {
             resources.resourceId(DEMO_RESOURCE_ID).stateless(true);
@@ -40,6 +45,8 @@ public class OAuth2ServerConfig {
         public void configure(HttpSecurity http) throws Exception {
             // @formatter:off
             http
+            .exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint)
+            .and()
                     // Since we want the protected resources to be accessible in the UI as well we need
                     // session creation to be allowed (it's disabled by default in 2.0.6)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -65,7 +72,7 @@ public class OAuth2ServerConfig {
         @Autowired
         RedisConnectionFactory redisConnectionFactory;
         @Autowired
-        UserDetailsService userDetailsService;
+        CustomUserDetailsService userDetailsService;
 
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -81,13 +88,15 @@ public class OAuth2ServerConfig {
                     .authorizedGrantTypes("password", "refresh_token")
                     .scopes("select")
                     .authorities("oauth2")
-                    .secret("123456");
+                    .secret("123456").accessTokenValiditySeconds(60);
         }
 
         @Override
         public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-            endpoints
-                    .tokenStore(new RedisTokenStore(redisConnectionFactory))
+        	RedisTokenStore redisTokenStore = new RedisTokenStore(redisConnectionFactory) ;
+        	redisTokenStore.setPrefix("oauth:");
+        	endpoints
+                    .tokenStore(redisTokenStore)
                     .authenticationManager(authenticationManager)
                     .userDetailsService(userDetailsService)
                     // 2018-4-3 增加配置，允许 GET、POST 请求获取 token，即访问端点：oauth/token

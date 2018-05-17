@@ -1,6 +1,9 @@
 package moe.cnkirito.security.oauth2.code.controller;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,9 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author 徐靖峰[OF2938]
  * company qianmi.com
@@ -25,6 +25,8 @@ import java.util.Map;
 @Slf4j
 public class QQCallbackController {
 
+	private Logger log = LoggerFactory.getLogger(QQCallbackController.class) ;
+	
 //    withClient("aiqiyi")
 //    .authorizedGrantTypes("authorization_code","refresh_token", "implicit")
 //    .authorities("ROLE_CLIENT")

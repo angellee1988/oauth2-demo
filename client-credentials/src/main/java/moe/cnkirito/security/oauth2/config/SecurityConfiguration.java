@@ -1,8 +1,13 @@
 package moe.cnkirito.security.oauth2.config;
 
 
+import moe.cnkirito.security.oauth2.service.CustomUserDetailsService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -26,13 +31,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 //                .withUser("user_2").password("123456").authorities("USER");
 //    }
 
-    @Bean
-    @Override
-    protected UserDetailsService userDetailsService(){
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername("user_1").password("123456").authorities("USER").build());
-        manager.createUser(User.withUsername("user_2").password("123456").authorities("USER").build());
-        return manager;
+//    @Bean
+//    @Override
+//    protected UserDetailsService userDetailsService(){
+//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+//        manager.createUser(User.withUsername("user_1").password("123456").authorities("USER").build());
+//        manager.createUser(User.withUsername("user_2").password("123456").authorities("USER").build());
+//        return manager;
+//    }
+	
+	@Autowired
+	private CustomUserDetailsService customUserDetailsService ;
+	
+	@Autowired
+    public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+            .userDetailsService(customUserDetailsService)
+            .passwordEncoder(new Md5PasswordEncoder()) ;
     }
 
     /**
